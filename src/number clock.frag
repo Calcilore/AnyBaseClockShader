@@ -1,8 +1,7 @@
-// go to line 221 to change the base of the clock
+// go to line 234 to change the number (iTime means time in seconds)
+// and go to line 235 to change the base you count in
 // you can only go up to base 10, later bases work but the digits
-// will be blank because there are only characters for 0-9
-// 
-// go to line 324 and 330 to change the colors
+// will be blank because i only have 0-9
 // 
 // if you want to make new digits just add a new function next
 // to the others, then build the digit using the three 
@@ -21,8 +20,6 @@
 //     to end, start and end are in radians
 //     (0 being no rotation, TAU being 1 rotation)
 //     and rotation must not be negative
-//
-// afterwards, just add it to the switch statement near the bottom
 
 const float PI = 3.1415926535897932384626433832795;
 const float TAU = PI*2.0;
@@ -60,12 +57,18 @@ float distanceSquared(vec2 a, vec2 b) {
     return disVec.x*disVec.x + disVec.y*disVec.y;
 }
 
+// i don't understand this code
 float distanceToLineSqr(vec2 a, vec2 b, vec2 pos) {
     float lengthSqr = distanceSquared(a, b);
     
     // if a and b are the same
     if (lengthSqr == 0.0) return distance(a, pos);
-
+    
+    // (i didn't write this comment)
+    // Consider the line extending the segment, parameterized as a + t (b - a).
+    // We find projection of point p onto the line. 
+    // It falls where t = [(pos-a) . (b-a)] / |b-a|^2
+    // We clamp t from [0,1] to handle points outside the segment ab.
     float t = clamp(dot(pos - a, b - a) / lengthSqr, 0.0, 1.0);
     vec2 projection = a + t * (b - a);  // Projection falls on the segment
     return distanceSquared(pos, projection);
@@ -76,6 +79,7 @@ float distanceToCircle(vec2 center, float radius, vec2 pos) {
     return abs(dis-radius);
 }
 
+// i do understand this code
 float distanceToArc(vec2 center, float radius, float start, float end, vec2 pos) {
     // get angle to point from center
     vec2 sub = pos - center;
@@ -175,6 +179,7 @@ bool four(vec2 pos, float scale) {
 }
 
 
+// i should have used more constants
 bool five(vec2 pos, float scale) {
     const float radius = 0.06;
     
@@ -212,15 +217,14 @@ bool nine(vec2 pos, float scale) {
 // |  Here we calculate the digits and draw the correct digit  |
 // |-----------------------------------------------------------|
 
-vec3 col = vec3(1.0); // used for debugging
+// We are assuming 16:9, if wider then it wont fill screen width, if skinnier it will be cut off
+vec3 col = vec3(1.0);
 const float COLON_THICKNESS = 0.015;
 
 bool doNumbers(vec2 uv) {
     float width = iResolution.x/iResolution.y;
 
     float base = float(int(abs(iDate.z)) % 9 + 2);
-    // float base = 2.0;
-    
     int digitsMiSe = int(logx(base, 60.0))+1;
     int digitsHo = int(logx(base, 24.0))+1;
 
@@ -318,7 +322,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     // if not square right of screen is determined by aspect
     // ratio, but y stays the same.
     uv = (fragCoord - iResolution.xy / 2.0)/iResolution.y;
-    uv.y = -uv.y; // make +y down
+    uv.y = -uv.y; // make +y down (my brain cant handle +y being up)
     
     // default background color
     vec3 col1 = vec3(0.1);
@@ -326,7 +330,6 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     bool on = doNumbers(uv);
     
     if (on) {
-        // number color
         col1 = vec3(1.0);
     }
     
